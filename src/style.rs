@@ -79,4 +79,18 @@ impl Style {
         self.modifier = modifier;
         self
     }
+
+    pub fn merge(self, other: Style) -> Style {
+        Style {
+            fg: match other.fg {
+                Color::Reset => self.fg,
+                other => other
+            },
+            bg: match other.bg {
+                Color::Reset => self.bg,
+                other => other
+            },
+            modifier: self.modifier | other.modifier
+        }
+    }
 }

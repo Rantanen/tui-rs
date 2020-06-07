@@ -197,23 +197,23 @@ where
                         list_area.width as usize,
                         highlight_style,
                     );
-                    (x, Some(highlight_style))
+                    (x, highlight_style)
                 } else {
                     let (x, _) =
                         buf.set_stringn(x, y, &blank_symbol, list_area.width as usize, self.style);
-                    (x, None)
+                    (x, self.style)
                 }
             } else {
-                (x, None)
+                (x, self.style)
             };
 
             let max_element_width = (list_area.width - (elem_x - x)) as usize;
             match item {
                 Text::Raw(ref v) => {
-                    buf.set_stringn(elem_x, y, v, max_element_width, style.unwrap_or(self.style));
+                    buf.set_stringn(elem_x, y, v, max_element_width, style);
                 }
                 Text::Styled(ref v, s) => {
-                    buf.set_stringn(elem_x, y, v, max_element_width, style.unwrap_or(s));
+                    buf.set_stringn(elem_x, y, v, max_element_width, s.merge(style));
                 }
             };
         }

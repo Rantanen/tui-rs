@@ -1,7 +1,7 @@
 use tui::backend::TestBackend;
 use tui::buffer::Buffer;
 use tui::layout::Constraint;
-use tui::widgets::{Block, Borders, Row, Table};
+use tui::widgets::{Block, Borders, Row, Table, TableState};
 use tui::Terminal;
 
 #[test]
@@ -415,4 +415,51 @@ fn widgets_table_columns_widths_can_use_mixed_constraints() {
             "└────────────────────────────┘",
         ]),
     );
+}
+
+#[test]
+fn widgets_table_highlights_merges_style_with_row_style() {
+
+    terminal
+        .draw(|mut f| {
+            let size = f.size();
+            let table = Table::new(
+                ["Head1", "Head2", "Head3"].iter(),
+                vec![
+                    Row::Data(["Row11", "Row12", "Row13"].iter()),
+                    Row::StyledData(
+                        ["Row21", "Row22", "Row23"].iter(),
+                        Style::default().fg(Color::Green)),
+                    Row::Data(["Row31", "Row32", "Row33"].iter()),
+                    Row::Data(["Row41", "Row42", "Row43"].iter()),
+                ]
+                .into_iter(),
+            )
+            .block(Block::default().borders(Borders::ALL))
+            .widths(&[
+                Constraint::Length(6),
+                Constraint::Length(6),
+                Constraint::Length(6),
+            ]);
+
+            let mut state = TableState::default();
+            state.select(Some(1));
+            f.render_stateful_widget(table, size, &mut state);
+        })
+        .unwrap();
+
+    let expected = Buffer::with_lines(vec![
+        "┌────────────────────────────┐",
+        "│Head1     Head2      Head3  │",
+        "│                            │",
+        "│Row11     Row12      Row13  │",
+        "│Row21     Row22      Row23  │",
+        "│Row31     Row32      Row33  │",
+        "│Row41     Row42      Row43  │",
+        "│                            │",
+        "│                            │",
+        "└────────────────────────────┘",
+    ]);
+
+    terminal.backend().assert_buffer(&expected);
 }
